@@ -1,84 +1,57 @@
-﻿using System.Data.SqlClient;
-// using System.Security.Cryptography.X509Certificates;
+﻿using System.Data;
+using System.Data.SqlClient;
+using System.Security.Cryptography.X509Certificates;
 using Explicit.Model;
 namespace Explicit;
 
 class Program
 {
-    private const string dbConn = "Server=.\\MSSQLSERVER05;Database=SchoolManagement;Trusted_Connection=True;";
+    private const string connectionString = "Server=.\\MSSQLSERVER05;Database=SchoolManagement;Trusted_Connection=True;";
     private static void Main(string[] args)
     {
-       List<Institution> institutions = GetInstitutions();
-        ShowInstitution(institutions);
-    }
+        SqlConnection sqlCon = new SqlConnection(connectionString);
 
-    // public void AddInstitution()
-    // {
-        
-    // }
-    // * This function get all the institution.
-    public static List<Institution> GetInstitutions()
-    {
-        List<Institution> institutions = new List<Institution>();
-
-        string sql = "SELECT * FROM Institution";
-
-
-        SqlConnection connection = new SqlConnection(dbConn);
-
+        string insertCommand = "INSERT INTO Institution(Name, Email, State, Country) VALUES (@Name,@Email,@State,@Country)";
         SqlCommand cmd = new SqlCommand();
-        cmd.Connection = connection;
-        cmd.CommandText = sql;
+        cmd.Connection = sqlCon;
+        cmd.CommandText = insertCommand;
 
-        try
-        {
-            connection.Open();
-            SqlDataReader reader = cmd.ExecuteReader();
+        
+        Console.WriteLine("Please provide Name of Institution.");
+        SqlParameter parameterName = new SqlParameter();
+        parameterName.ParameterName = "@Name";
+        parameterName.SqlDbType = System.Data.SqlDbType.VarChar;
+        parameterName.Direction = System.Data.ParameterDirection.Input;
+        parameterName.SqlValue = Console.ReadLine();
+        cmd.Parameters.Add(parameterName);
 
-            while(reader.Read())
-            {
-            Institution institution = new Institution();
-            institution.Id = reader.GetInt32(0);
-            institution.Name = reader.GetString(1);
-            institution.Email = reader.GetString(2);
-            institution.State = reader.GetString(3);
-            institution.Country = reader.GetString(4);
+        Console.WriteLine("Please provide Email of Institution.");
+        SqlParameter parameterEmail = new SqlParameter();
+        parameterEmail.ParameterName = "@Email";
+        parameterEmail.SqlDbType = System.Data.SqlDbType.VarChar;
+        parameterEmail.Direction = System.Data.ParameterDirection.Input;
+        parameterEmail.SqlValue = Console.ReadLine();
+        cmd.Parameters.Add(parameterEmail);
 
-            institutions.Add(institution);
-            }
+        Console.WriteLine("Please provide State of Institution.");
+        SqlParameter parameterState = new SqlParameter();
+        parameterState.ParameterName = "@State";
+        parameterState.SqlDbType = System.Data.SqlDbType.VarChar;
+        parameterState.Direction = System.Data.ParameterDirection.Input;
+        parameterState.SqlValue = Console.ReadLine();
+        cmd.Parameters.Add(parameterState);
 
-        }
-        catch(SqlException e)
-        {
-            Console.WriteLine("Data operation failed" + e.Message);
-        }
-        catch(Exception e)
-        {
-            Console.WriteLine("Something went wrong fixe it.." + e.Message);
-        }
-        finally
-        {
-            connection.Close();
-        }
-       
-            return institutions;
+        Console.WriteLine("Please provide Country of Institution.");
+        SqlParameter parameterCountry = new SqlParameter();
+        parameterCountry.ParameterName = "@Country";
+        parameterCountry.SqlDbType = System.Data.SqlDbType.VarChar;
+        parameterCountry.Direction = System.Data.ParameterDirection.Input;
+        parameterCountry.SqlValue = Console.ReadLine();
+        cmd.Parameters.Add(parameterCountry);
+
+        sqlCon.Open();
+        int result = cmd.ExecuteNonQuery();
+        sqlCon.Close();
     }
 
-    // * This function show all the institution.
-    public static void ShowInstitution(List<Institution> institutions)
-    {
-        foreach(Institution institution in institutions)
-        {
-             Console.WriteLine("====================Example=======================");
-
-            Console.WriteLine($"Id: { institution.Id }");
-            Console.WriteLine($"Name: { institution.Name }");
-            Console.WriteLine($"Email: { institution.Email }");
-            Console.WriteLine($"State: { institution.State }");
-            Console.WriteLine($"Country: { institution.Country }");
-
-            Console.WriteLine("====================End=======================");
-        }
-
-    }
 }
